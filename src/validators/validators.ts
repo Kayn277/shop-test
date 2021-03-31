@@ -18,3 +18,26 @@ export const productValidator = Joi.object({
     price: Joi.number().required(),
     count: Joi.number().required()
 })
+
+export const orderValidator = Joi.object({
+    count: Joi.number().required(),
+    status: Joi.number().required()
+})
+
+// @Column({primary: true, type: "uuid", generated:'uuid'})
+//     id: number;
+
+//     @Column({type: "int", nullable: false})
+//     Count: number;
+
+//     @Column({type: "decimal", nullable: false})
+//     price: number;
+
+//     @Column({type: "int", nullable: false})
+//     count: number;
+
+//     @ManyToOne(() => Product, product => product.order)
+//     product: Product;
+
+//     @ManyToOne(() => User, user => user.order)
+//     user: User;

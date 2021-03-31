@@ -36,31 +36,33 @@ router.post('/', async (ctx, next) => {
         const ProductRepo:Repository<Product> = getRepository(Product);
         let findUser = await user;
         if(findUser) {
-            let createProduct:Product = ctx.request.body as Product;
-            let findShop = await ShopRepo.findOne({where: {id: createProduct.shop}, relations: ['owner']});
-            console.log(createProduct.shop);
+            let {name, price, count, shopId} = ctx.request.body;
+            if(!shopId) ctx.throw("Bad Request", 402);
+            let findShop = await ShopRepo.findOne({where: {id: shopId}, relations: ['owner']});
             if(findShop.owner.id == findUser.id)
             {
-                if(createProduct) {
                     try {
 
                         let product = productValidator.validate({
-                            name: createProduct.name, 
-                            price: createProduct.price, 
-                            count: createProduct.count
+                            name: name, 
+                            price: price, 
+                            count: count
                         });
-
                         if(product.error) {
                             throw product.error;
                         }
                         else {
-                            ctx.body = await ProductRepo.save(createProduct);
+                            let product: Product = new Product();
+                            product.name = name;
+                            product.price = price;
+                            product.count = count;
+                            product.shop = findShop;
+                            ctx.body = await ProductRepo.save(product);
                         }
                     }
                     catch (err) {
                         ctx.throw(err, 402);
                     }
-                }
             }
             else {
                 ctx.throw('Bad Request', 402);
