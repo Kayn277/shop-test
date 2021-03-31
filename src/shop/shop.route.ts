@@ -1,15 +1,16 @@
-import * as Koa from 'koa';
 import * as Router from 'koa-router';
 import { getRepository, Repository } from 'typeorm';
 import { Shop } from './entity/shop.entity';
 import * as Passport from "koa-passport";
-import { User } from '../users/entity/user.entity';
 import {shopValidator} from '../validators/validators'
+import { User } from '../users/entity/user.entity';
+
+
 export const router = new Router({prefix: '/shop'});
 
 router.get('/', async (ctx) => {
     const ShopRepo:Repository<Shop> = getRepository(Shop);
-    const Shops = await ShopRepo.find();
+    const Shops = await ShopRepo.find({relations: ['owner']});
     if(Shops) {
         ctx.body = Shops;
     }
@@ -20,7 +21,7 @@ router.get('/', async (ctx) => {
 
 router.get('/:id', async (ctx) => {
     const ShopRepo:Repository<Shop> = getRepository(Shop);
-    const Shops = await ShopRepo.findOne(ctx.params.id);
+    const Shops = await ShopRepo.findOne(ctx.params.id, {relations: ['owner']});
     if(Shops) {
         ctx.body = Shops;
     }
@@ -37,15 +38,20 @@ router.post('/', async (ctx, next) => {
             let createdShop: Shop = new Shop();
             let { name } = ctx.request.body;
             if(name) {
-                if(!shopValidator(name).error) {
-                    createdShop.name = name;
-                    createdShop.owner = findUser.id;
-                    console.log(findUser);
-                    ctx.body = ShopRepo.save(createdShop);
-                } else {
-                    ctx.throw('Bad Request', 402);
+                try {
+                    let shop = shopValidator.validate({ name });
+                    if(shop.error) {
+                        throw shop.error;
+                    }
+                    else {
+                        createdShop.name = shop.value.name;
+                        createdShop.owner = findUser.id;
+                        ctx.body = await ShopRepo.save(createdShop);
+                    }
                 }
-                
+                catch (err) {
+                    ctx.throw(err, 402);
+                }
             }
         }
         else {
@@ -54,29 +60,53 @@ router.post('/', async (ctx, next) => {
     }) (ctx, next)
 });
 
-router.put('/:id', async (ctx) => {
-    const ShopRepo:Repository<Shop> = getRepository(Shop);
-    const shop: Shop = ctx.request.body as Shop;
-    if(shop) {
-        const updatedShop = await ShopRepo.update(ctx.params.id ,shop);
-        if(updatedShop) {
-            ctx.body = updatedShop.raw.message;
+router.put('/:id', async (ctx, next) => {
+    return await Passport.authenticate('jwt', async (err, user) => {
+        const ShopRepo:Repository<Shop> = getRepository(Shop);
+        let findShop = await ShopRepo.findOne(ctx.params.id, {relations: ['owner']});
+        let findUser = await user;
+        if(findUser.id == findShop.owner.id) {
+            let updatedShop: Shop = ctx.request.body as Shop;
+            let { name } = updatedShop;
+            if(name) {
+                try {
+                    let shop = shopValidator.validate({ name });
+                    if(shop.error) {
+                        throw shop.error;
+                    }
+                    else {
+                        ctx.body = await ShopRepo.update(ctx.params.id, updatedShop);
+                    }
+                }
+                catch (err) {
+                    ctx.throw(err, 402);
+                }
+            }
         }
-    }
-    else {
-        ctx.throw('Bad Request', 402);
-    }
+        else {
+            ctx.throw('Unauthorized', 401);
+        }
+    }) (ctx, next)
 });
 
-router.delete('/:id', async (ctx) => {
-    const ShopRepo:Repository<Shop> = getRepository(Shop);
-    const shop: Shop = await ShopRepo.findOne(ctx.params.id);
-    if(shop) {
-        ctx.body = ShopRepo.delete(shop);
-    }
-    else {
-        ctx.throw('Not Found', 404);
-    }
+router.delete('/:id', async (ctx, next) => {
+    return await Passport.authenticate('jwt', async (err, user) => {
+        const ShopRepo:Repository<Shop> = getRepository(Shop);
+        let findShop = await ShopRepo.findOne(ctx.params.id, {relations: ['owner']});
+        let findUser = await user;
+        if(findUser.id == findShop.owner.id) {
+            try {
+                ctx.body = (await ShopRepo.delete(ctx.params.id)).raw.affectedRows;
+            }
+            catch (err) {
+                ctx.throw(err, 402);
+                
+            }
+        }
+        else {
+            ctx.throw('Unauthorized', 401);
+        }
+    }) (ctx, next)
 });
 
 export default router;

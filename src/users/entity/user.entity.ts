@@ -8,7 +8,7 @@ export class User {
     @Column({primary: true, type: "uuid", generated:'uuid'})
     id: number;
 
-    @Column({type: "varchar", length: 64, nullable: false})
+    @Column({type: "varchar", length: 64, nullable: false, unique: true})
     login: string;
 
     @Column({type: "text", nullable: false})

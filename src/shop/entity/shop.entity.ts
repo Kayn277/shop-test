@@ -1,4 +1,5 @@
-import { Column, Entity, ManyToOne } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
+import { Product } from "../../product/entity/product.entity";
 import { User } from "../../users/entity/user.entity";
 
 
@@ -12,6 +13,9 @@ export class Shop {
     name: string;
 
     @ManyToOne(() => User, user => user.shop)
-    owner: string;
+    owner: User;
+
+    @OneToMany(() => Product, product => product.shop)
+    product: Product[];
 
 }

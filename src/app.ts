@@ -8,6 +8,7 @@ import * as KoaBody from 'koa-body';
 import {router as UserRouter}  from '../src/users/user.route';
 import {router as AuthRouter}  from '../src/auth/auth.router';
 import {router as ShopRouter}  from '../src/shop/shop.route';
+import {router as ProductRouter}  from '../src/product/product.route';
 
 import connection from './database/connection';
 
@@ -30,7 +31,9 @@ passport.use(JwtStrategy);
 app.use(UserRouter.routes()).use(UserRouter.allowedMethods());
 app.use(AuthRouter.routes()).use(AuthRouter.allowedMethods());
 app.use(ShopRouter.routes()).use(ShopRouter.allowedMethods());
+app.use(ProductRouter.routes()).use(ProductRouter.allowedMethods());
 //
+
 app.on('error', console.error);
 
 connection
