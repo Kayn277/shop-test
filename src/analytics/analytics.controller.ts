@@ -1,5 +1,5 @@
 import * as Router from 'koa-router';
-import { getRepository, Repository, In } from 'typeorm';
+import { getRepository, Repository, In, } from 'typeorm';
 import * as Passport from "koa-passport";
 import { Shop } from '../shop/entity/shop.entity';
 import { Order } from '../order/entity/order.entity';
@@ -18,17 +18,20 @@ class AnalyticsController {
             if (user) {
                 let findUser = await user;
                 const shops = await ShopRepo.find({ where: { owner: { id: findUser.id } }, relations: ['owner'] })
-                const products = await ProductRepo.find({ where: { shop: { id: shops.map(value => { return value.id },) } } });
+                const products = await ProductRepo.find({ where: { shop: { id: In(shops.map(value => { return value.id }),) } } });
                 const Orders = await OrderRepo.find({
-                    where: { product: { id: products.map(value => { return value.id }) } },
+                    where: { product: { id: In(products.map(value => { return value.id })) } },
                     relations: ['product']
                 })
 
                 if (Orders) {
                     let sellCount: number = 0, sellPrice: number = 0;
-                    Orders.map(value => { return +value.count }).forEach(value => { sellCount += value });
-                    Orders.map(value => { return +value.product.price }).forEach(value => { sellPrice += value });
-                    ctx.body = { sellCount: sellCount, sellPrice: sellCount * sellPrice };
+                    let arrayPrice = Orders.map(value => { return +value.product.price });
+                    let arrayCount = Orders.map(value => { return +value.count })
+                    let sum = arrayCount.map((v, i) => { return arrayPrice[i] * v })
+                    arrayCount.forEach(value => { sellCount += value });
+                    sum.forEach(value => { sellPrice += value });
+                    ctx.body = { sellCount: sellCount, sellPrice: sellPrice };
                 }
                 else {
                     ctx.throw('Not Found', 404);
@@ -56,15 +59,18 @@ class AnalyticsController {
                     if (shops.owner.id == findUser.id) {
                         const products = await ProductRepo.find({ where: { shop: { id: shops.id } } });
                         const Orders = await OrderRepo.find({
-                            where: { product: { id: products.map(value => { return value.id }) } },
+                            where: { product: { id: In(products.map(value => { return value.id })) } },
                             relations: ['product']
                         })
 
                         if (Orders) {
                             let sellCount: number = 0, sellPrice: number = 0;
-                            Orders.map(value => { return +value.count }).forEach(value => { sellCount += value });
-                            Orders.map(value => { return +value.product.price }).forEach(value => { sellPrice += value });
-                            ctx.body = { sellCount: sellCount, sellPrice: sellCount * sellPrice };
+                            let arrayPrice = Orders.map(value => { return +value.product.price });
+                            let arrayCount = Orders.map(value => { return +value.count })
+                            let sum = arrayCount.map((v, i) => { return arrayPrice[i] * v })
+                            arrayCount.forEach(value => { sellCount += value });
+                            sum.forEach(value => { sellPrice += value });
+                            ctx.body = { sellCount: sellCount, sellPrice: sellPrice };
                         }
                         else {
                             ctx.throw('Not Found', 404);

@@ -2,6 +2,7 @@
 Paths: <br />
 Auth <br />
 POST /auth/login - Authorizate user return jwt token response: {"login":"login", "token":"token"} <br />
+POST /auth/register - Create new user: {"login":"login", "password":"password"} password encrypt by bcrypt<br />
 
 User
 ```ts
@@ -13,7 +14,6 @@ export class User {
 ``` 
 GET /user - Get All users without passwords <br />
 GET /user/:id - Get user with search id without passwords <br />
-POST /user - Create new user {"login":"login", "password":"password"} password encrypt by bcrypt <br />
 PUT /user/:id - Update {"password":"password"} User can change only own data <br />
 DELETE /user/:id - Delete user. User can delete self data only <br />
 

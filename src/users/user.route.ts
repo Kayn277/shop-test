@@ -6,8 +6,6 @@ router.get('/', UserController.GetAll);
 
 router.get('/:id', UserController.GetOne)
 
-router.post('/', UserController.CreateOne)
-
 router.put('/:id', UserController.UpdateOne)
 
 router.delete('/:id', UserController.DeleteOne)

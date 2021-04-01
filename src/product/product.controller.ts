@@ -22,7 +22,7 @@ class ProductController {
 
     public async GetOne(ctx: Router.IRouterContext, next: Next) {
         const ProductRepo: Repository<Product> = getRepository(Product);
-        const ProductFind = await ProductRepo.findOne(ctx.params.id);
+        const ProductFind = await ProductRepo.findOne(ctx.params.id, {relations: ['shop']});
         if (ProductFind) {
             ctx.body = ProductFind;
         }
