@@ -1,3 +1,10 @@
+Startup:
+
+--npm install
+
+Fill .env
+
+--npm run start
 
 Paths: <br />
 Auth <br />

@@ -10,7 +10,8 @@ const connectionOptions: ConnectionOptions = {
     password: process.env.DB_PASSWORD || 'password',
     entities: ['src/**/*.entity.ts'],
     synchronize: true,
-    logging: false
+    logging: false,
+    insecureAuth: true
 }
 
 const connection = createConnection(connectionOptions);
