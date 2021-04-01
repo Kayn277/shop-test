@@ -16,6 +16,9 @@ export class Order {
     @Column({type: "int", nullable: false})
     status: number;
 
+    @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP"})
+    orderDate: string;
+
     @ManyToOne(() => Product, product => product.order)
     product: Product;
 

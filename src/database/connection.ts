@@ -8,7 +8,7 @@ const connectionOptions: ConnectionOptions = {
     database: process.env.DB_SCHEMA || 'db_test',
     username: process.env.DB_LOGIN || 'login',
     password: process.env.DB_PASSWORD || 'password',
-    entities : ['src/**/*.entity.ts'],
+    entities: ['src/**/*.entity.ts'],
     synchronize: true,
     logging: false
 }
