@@ -4,7 +4,7 @@ import { User } from './entity/user.entity';
 import * as Passport from "koa-passport";
 import {updateUserValidator, registerValidator} from '../validators/validators'
 import { Next } from 'koa';
-
+import * as bcrypt from 'bcrypt';
 
 class UserController {
 
@@ -42,6 +42,7 @@ class UserController {
                     throw user.error;
                 }
                 else {
+                    createUser.password = await bcrypt.hash(createUser.password, 3);
                     const createdUser = await userRepo.save(createUser);
                     ctx.body = createdUser;
                 }
