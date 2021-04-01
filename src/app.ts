@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-dotenv.config({ path: '.env-dev' });
+dotenv.config();
 
 import * as Koa from 'koa';
 import * as KoaBody from 'koa-body';
